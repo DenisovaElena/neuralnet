@@ -15,6 +15,7 @@ public class GUI extends JFrame
     private JPanel rootPanel;
     private JButton button1;
     private JPanel imagePanel;
+    private JLabel label1;
 
     public GUI()
     {
@@ -42,8 +43,18 @@ public class GUI extends JFrame
                 for (File file : files)
                 {
                     BufferedImage image = ImageIO.read(file);
-                    imagePanel.paint(image.createGraphics());
-                    repaint();
+                    rootPanel = new JPanel()
+                    {
+                        @Override
+                        public void paint(Graphics g)
+                        {
+                            super.paint(g);
+                            g.drawImage(image, 28, 28, null);
+                        }
+                    };
+
+
+                    label1.setText("OK");
                     /*
                     int[][] grayImage = imageToGrayScale(image);
 
