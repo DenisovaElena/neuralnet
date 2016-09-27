@@ -43,6 +43,7 @@ public class GUI extends JFrame
                 {
                     BufferedImage image = ImageIO.read(file);
                     imagePanel.paint(image.createGraphics());
+                    repaint();
                     /*
                     int[][] grayImage = imageToGrayScale(image);
 
