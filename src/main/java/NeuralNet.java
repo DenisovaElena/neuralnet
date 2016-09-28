@@ -43,7 +43,7 @@ public class NeuralNet
             {
                 // создаем пустой массив для хранения величины изменения каждого синпатического веса wij
                 double[] deltaWeight = new double[layer[j].getWeight().length];
-                // вычисляем величину изменения синпатических весов wij
+                // вычисляем величину изменения синапатических весов wij
                 for (int i = 0; i < layer[j].getWeight().length; i++)
                 {
                     deltaWeight[i] += eta * error[j] * vectorSet[m].getX()[i];
