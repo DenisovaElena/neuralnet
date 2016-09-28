@@ -1,5 +1,5 @@
 /**
- * Created by ColdDeath&Dummy on 27.09.2016.
+ * Created by MakhrovSS on 27.09.2016.
  */
 public class Vector
 {

@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import static javax.swing.JOptionPane.showMessageDialog;
 
@@ -17,54 +18,59 @@ import static javax.swing.JOptionPane.showMessageDialog;
 public class GUI extends JFrame
 {
     private JPanel rootPanel;
-    private JButton button1;
+    private JButton buttonTrain;
     private JPanel imagePanel;
     private JLabel imageLabel;
     private JLabel labelError;
     private JLabel labelAnswer;
+    private JLabel labelEpoch;
+    private JTextArea textAreaAnswer;
+    private JButton buttonTest;
+    private NeuralNet neuralNet;
 
     public GUI()
     {
         setContentPane(rootPanel);
         pack();
+        setTitle("Обучение через дельта-правило");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setVisible(true);
 
-        button1.addActionListener(new ActionListener() {
+        buttonTrain.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                launch();
+                train();
+            }
+        });
+        buttonTest.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                test();
             }
         });
     }
 
-    public void launch()
+    public void train()
     {
         try
         {
-            Vector[] trainVectorSet = readTrainVectors("C://MNIST");
-            NeuralNet neuralNet = new NeuralNet(trainVectorSet[0].getX().length, trainVectorSet[0].getDisireOutputs().length);
+            Vector[] trainVectorSet = readTrainVectors("C://Train");
+            neuralNet = new NeuralNet(trainVectorSet[0].getX().length, trainVectorSet[0].getDisireOutputs().length);
             neuralNet.setComplete(false);
 
-            Runnable task1 = () -> neuralNet.train(trainVectorSet);
+            Runnable task1 = () -> { try { neuralNet.train(trainVectorSet); } catch (InterruptedException e) {} };
             Thread thread1 = new Thread(task1);
-            thread1.start();
-
             Runnable task2 = () -> {
                 while (!neuralNet.isComplete())
                 {
-                    labelError.setText("Ошибки нейронов: " + neuralNet.getEpochNumber());
+                    labelEpoch.setText("Номер эпохи: " + neuralNet.getEpochNumber());
+                    labelError.setText("Ошибки нейронов: " + Arrays.toString(neuralNet.getError()));
                 }
             };
             Thread thread2 = new Thread(task2);
+
+            thread1.start();
             thread2.start();
-
-            thread1.join();
-
-            double[] testVector = readVector("c:\\MNIST\\0\\0_0.bmp");
-            double[] answer = neuralNet.test(testVector);
-            labelAnswer.setText("Ответ: " + answer.toString() + "");
-
         }
         catch (IOException e)
         {
@@ -76,6 +82,31 @@ public class GUI extends JFrame
         }
 
         int f = 0;
+    }
+
+    public void test() {
+        try
+        {
+            String path = "c://Test//";
+            for (int i = 0; i < 10; i++)
+            {
+                File[] files = new File(path + i).listFiles();
+                for (File file : files)
+                {
+                    double[] testVector = readVector(file.getPath());
+                    double[] answer = neuralNet.test(testVector);
+                    textAreaAnswer.append(String.format("Образ №%d = %s;%n", i, Arrays.toString(answer)));
+                }
+            }
+        }
+        catch (IOException e)
+        {
+            showMessageDialog(null, "Файл не найден");
+        }
+        catch (Exception e)
+        {
+            showMessageDialog(null, e.toString());
+        }
     }
 
     public double[] readVector(String path) throws IOException

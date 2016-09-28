@@ -1,13 +1,14 @@
 /**
- * Created by ColdDeath&Dummy on 27.09.2016.
+ * Created by MakhrovSS on 27.09.2016.
  */
 public class NeuralNet
 {
     private int inputVectorSize;
     private Neuron[] layer;
     private int epochNumber;
-    private boolean complete;
+    private volatile boolean complete;
     private double[] error;
+    private final double eta = 0.5;
 
     public NeuralNet(int inputVectorSize, int outputNeuronsCount)
     {
@@ -36,56 +37,48 @@ public class NeuralNet
         return complete;
     }
 
-    public void train(Vector[] vectorSet)
+    public void train(Vector[] vectorSet) throws InterruptedException
     {
         // задаем коэффициент скорости обучения
-        double eta = 0.01;
         epochNumber = 0;
-        for (int m = 0; m < vectorSet.length; m++)
+        do
         {
-            // вычисляем выход каждого j-го нейрона
-            for (int j = 0; j < layer.length; j++)
-            {
-                layer[j].calcOut(vectorSet[m].getX());
-            }
-
-            // создаем пустой массив для хранения ошибки каждого j-го нейрона
-            error = new double[layer.length];
-            // вычисляем ошибку каждого j-го нейрона
-            double sumError = 0;
-            for (int j = 0; j < layer.length; j++)
-            {
-                error[j] = vectorSet[m].getDisireOutputs()[j] - layer[j].getOut();
-                sumError += error[j];
-            }
-
-            // цикл коррекции синаптических весов
-            for (int j = 0; j < layer.length; j++)
-            {
-                // создаем пустой массив для хранения величины изменения каждого синпатического веса wij
-                double[] deltaWeight = new double[layer[j].getWeight().length];
-                // вычисляем величину изменения синапатических весов wij
-                int n = layer[j].getWeight().length;
-                for (int i = 0; i < n - 1; i++)
-                {
-                    deltaWeight[i] += eta * error[j] * vectorSet[m].getX()[i];
+            for (int m = 0; m < vectorSet.length; m++) {
+                // вычисляем выход каждого j-го нейрона
+                for (int j = 0; j < layer.length; j++) {
+                    layer[j].calcOut(vectorSet[m].getX());
                 }
-                deltaWeight[n - 1] += eta * error[j];
-                // корректируем синпатические веса
-                layer[j].correctWeights(deltaWeight);
-            }
 
-            // критерий останова обучения
-            if (epochNumber > 300)
-            {
-                complete = true;
-                break;
+                // создаем пустой массив для хранения ошибки каждого j-го нейрона
+                error = new double[layer.length];
+                // вычисляем ошибку каждого j-го нейрона
+                double sumError = 0;
+                for (int j = 0; j < layer.length; j++) {
+                    error[j] = vectorSet[m].getDisireOutputs()[j] - layer[j].getOut();
+                    sumError += error[j];
+                }
+
+                Thread.sleep(100);
+                // цикл коррекции синаптических весов
+                for (int j = 0; j < layer.length; j++) {
+                    // создаем пустой массив для хранения величины изменения каждого синпатического веса wij
+                    double[] deltaWeight = new double[layer[j].getWeight().length];
+                    // вычисляем величину изменения синапатических весов wij
+                    int n = layer[j].getWeight().length;
+                    for (int i = 0; i < n - 1; i++) {
+                        deltaWeight[i] += eta * error[j] * vectorSet[m].getX()[i];
+                    }
+                    deltaWeight[n - 1] += eta * error[j];
+                    // корректируем синпатические веса
+                    layer[j].correctWeights(deltaWeight);
+                }
+
             }
-            else
-            {
-                epochNumber++;
-            }
-        }
+            epochNumber++;
+        } // критерий останова обучения
+        while (epochNumber <= 10);
+        complete = true;
+
     }
 
     public double[] test(double[] vector)
