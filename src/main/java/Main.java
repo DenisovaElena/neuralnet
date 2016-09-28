@@ -7,7 +7,6 @@ public class Main
 {
     public static void main(String[] args) throws IOException
     {
-        //NeuralNet neuralNet = new NeuralNet(400, 10);
         GUI gui = new GUI();
     }
 

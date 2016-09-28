@@ -5,6 +5,9 @@ public class NeuralNet
 {
     private int inputVectorSize;
     private Neuron[] layer;
+    private int epochNumber;
+    private boolean complete;
+    private double[] error;
 
     public NeuralNet(int inputVectorSize, int outputNeuronsCount)
     {
@@ -14,12 +17,30 @@ public class NeuralNet
         {
             layer[j] = new Neuron(inputVectorSize);
         }
+        error = new double[layer.length];
+    }
+
+    public double[] getError() {
+        return error;
+    }
+
+    public int getEpochNumber() {
+        return epochNumber;
+    }
+
+    public void setComplete(boolean complete) {
+        this.complete = complete;
+    }
+
+    public boolean isComplete() {
+        return complete;
     }
 
     public void train(Vector[] vectorSet)
     {
         // задаем коэффициент скорости обучения
-        double eta = 0.5;
+        double eta = 0.01;
+        epochNumber = 0;
         for (int m = 0; m < vectorSet.length; m++)
         {
             // вычисляем выход каждого j-го нейрона
@@ -29,7 +50,7 @@ public class NeuralNet
             }
 
             // создаем пустой массив для хранения ошибки каждого j-го нейрона
-            double[] error = new double[layer.length];
+            error = new double[layer.length];
             // вычисляем ошибку каждого j-го нейрона
             double sumError = 0;
             for (int j = 0; j < layer.length; j++)
@@ -44,17 +65,26 @@ public class NeuralNet
                 // создаем пустой массив для хранения величины изменения каждого синпатического веса wij
                 double[] deltaWeight = new double[layer[j].getWeight().length];
                 // вычисляем величину изменения синапатических весов wij
-                for (int i = 0; i < layer[j].getWeight().length; i++)
+                int n = layer[j].getWeight().length;
+                for (int i = 0; i < n - 1; i++)
                 {
                     deltaWeight[i] += eta * error[j] * vectorSet[m].getX()[i];
                 }
+                deltaWeight[n - 1] += eta * error[j];
                 // корректируем синпатические веса
                 layer[j].correctWeights(deltaWeight);
             }
 
             // критерий останова обучения
-            if (sumError == 0)
+            if (epochNumber > 300)
+            {
+                complete = true;
                 break;
+            }
+            else
+            {
+                epochNumber++;
+            }
         }
     }
 

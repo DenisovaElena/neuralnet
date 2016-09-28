@@ -40,7 +40,7 @@ public class Neuron
         {
             sum += x[i]*weight[i];
         }
-        this.out = sum;
+        this.out = activationFunc(sum);
     }
 
     public double getOut()

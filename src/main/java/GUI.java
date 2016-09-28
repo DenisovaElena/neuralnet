@@ -20,6 +20,8 @@ public class GUI extends JFrame
     private JButton button1;
     private JPanel imagePanel;
     private JLabel imageLabel;
+    private JLabel labelError;
+    private JLabel labelAnswer;
 
     public GUI()
     {
@@ -38,14 +40,35 @@ public class GUI extends JFrame
 
     public void launch()
     {
-
         try
         {
             Vector[] trainVectorSet = readTrainVectors("C://MNIST");
             NeuralNet neuralNet = new NeuralNet(trainVectorSet[0].getX().length, trainVectorSet[0].getDisireOutputs().length);
-            neuralNet.train(trainVectorSet);
-            showMessageDialog(null, "Ответ: " + neuralNet.test(readVector("C://MNIST//1/1_100.bmp")).toString());
+            neuralNet.setComplete(false);
 
+            Runnable task1 = () -> neuralNet.train(trainVectorSet);
+            Thread thread1 = new Thread(task1);
+            thread1.start();
+
+            Runnable task2 = () -> {
+                while (!neuralNet.isComplete())
+                {
+                    labelError.setText("Ошибки нейронов: " + neuralNet.getEpochNumber());
+                }
+            };
+            Thread thread2 = new Thread(task2);
+            thread2.start();
+
+            thread1.join();
+
+            double[] testVector = readVector("c:\\MNIST\\0\\0_0.bmp");
+            double[] answer = neuralNet.test(testVector);
+            labelAnswer.setText("Ответ: " + answer.toString() + "");
+
+        }
+        catch (IOException e)
+        {
+            showMessageDialog(null, "Файл не найден");
         }
         catch (Exception e)
         {
@@ -61,8 +84,6 @@ public class GUI extends JFrame
         int[][] grayImage = imageToGrayScale(image);
         double[] imageVector = imageToVector(grayImage);
         return imageVector;
-
-
     }
 
 
@@ -70,7 +91,7 @@ public class GUI extends JFrame
     {
         List<Vector> trainVectorSet = new ArrayList();
 
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 3; i++)
         {
             File[] files = new File(rootDir + "//" + i).listFiles();
             for (File file : files)
