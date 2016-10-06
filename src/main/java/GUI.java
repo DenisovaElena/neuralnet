@@ -36,6 +36,7 @@ public class GUI extends JFrame
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setVisible(true);
+        buttonTest.setEnabled(false);
 
         buttonTrain.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -54,6 +55,7 @@ public class GUI extends JFrame
     {
         try
         {
+            buttonTest.setEnabled(false);
             Vector[] trainVectorSet = readTrainVectors("C://Train");
             neuralNet = new NeuralNet(trainVectorSet[0].getX().length, trainVectorSet[0].getDisireOutputs().length);
             neuralNet.setComplete(false);
@@ -66,6 +68,8 @@ public class GUI extends JFrame
                     labelEpoch.setText("Номер эпохи: " + neuralNet.getEpochNumber());
                     labelError.setText("Ошибки нейронов: " + Arrays.toString(neuralNet.getError()));
                 }
+                textAreaAnswer.append("Обучение завершено\n");
+                buttonTest.setEnabled(true);
             };
             Thread thread2 = new Thread(task2);
 
@@ -88,14 +92,15 @@ public class GUI extends JFrame
         try
         {
             String path = "c://Test//";
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 6; i++)
             {
                 File[] files = new File(path + i).listFiles();
                 for (File file : files)
                 {
                     double[] testVector = readVector(file.getPath());
                     double[] answer = neuralNet.test(testVector);
-                    textAreaAnswer.append(String.format("Образ №%d = %s;%n", i, Arrays.toString(answer)));
+                    textAreaAnswer.append(String.format("Тест-образ №%d = %s;%n", i, Arrays.toString(answer)));
+                    //textAreaAnswer.setCaretPosition(textAreaAnswer.getDocument().getLength());
                 }
             }
         }
@@ -122,7 +127,7 @@ public class GUI extends JFrame
     {
         List<Vector> trainVectorSet = new ArrayList();
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 6; i++)
         {
             File[] files = new File(rootDir + "//" + i).listFiles();
             for (File file : files)
@@ -132,7 +137,7 @@ public class GUI extends JFrame
                 int[][] grayImage = imageToGrayScale(image);
                 double[] imageVector = imageToVector(grayImage);
 
-                double[] desireOutputs = new double[10];
+                double[] desireOutputs = new double[6];
                 for (int k = 0; k < desireOutputs.length; k++)
                 {
                     desireOutputs[k] = i == k ? 1 : 0;
