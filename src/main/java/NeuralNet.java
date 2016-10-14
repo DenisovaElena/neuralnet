@@ -14,8 +14,8 @@ public class NeuralNet
     private volatile boolean complete;
     private double[] error;
     private double errorCommon;
-    private final double eta = 0.001;
-    private final double epsThreshold = 0.01;
+    private final double eta = 0.05;
+    private final double epsThreshold = 0.1;
 
     public NeuralNet(int inputVectorSize, int outputNeuronsCount)
     {
@@ -77,7 +77,7 @@ public class NeuralNet
                 for (int j = 0; j < layer.length; j++)
                 {
                     error[j] = (vectorSet[m].getDisireOutputs()[j] - layer[j].getOut()) * (vectorSet[m].getDisireOutputs()[j] - layer[j].getOut());
-                    errorCommon += 0.5 * error[j];
+                    errorCommon += 0.5 * error[j] / vectorSet.length;
                 }
 
                 // цикл вычисления величин коррекции синаптических весов
@@ -94,7 +94,7 @@ public class NeuralNet
                 }
             }
 
-            Thread.sleep(1);
+
 
             // цикл коррекции синаптических весов
             for (int j = 0; j < layer.length; j++)
