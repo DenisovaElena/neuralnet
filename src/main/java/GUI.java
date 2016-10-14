@@ -101,7 +101,7 @@ public class GUI extends JFrame
                 {
                     double[] testVector = readVector(file.getPath());
                     double[] answer = neuralNet.test(testVector);
-                    textAreaAnswer.append(String.format("Тест-образ №%d = %s;%n", i, Arrays.toString(answer)));
+                    textAreaAnswer.append(String.format("Тест-образ №%d = %s; Нейрон №%d.%n", i, Arrays.toString(answer), getMaxNeuronIdx(answer)));
                     //textAreaAnswer.setCaretPosition(textAreaAnswer.getDocument().getLength());
                 }
             }
@@ -115,6 +115,18 @@ public class GUI extends JFrame
             showMessageDialog(null, e.toString());
         }
     }
+
+    public int getMaxNeuronIdx(double[] answer)
+    {
+        int maxIdx = 0;
+        for (int i = 1; i < answer.length; i++)
+        {
+            if (answer[maxIdx] < answer[i])
+                maxIdx = i;
+        }
+        return maxIdx;
+    }
+
 
     public double[] readVector(String path) throws IOException
     {

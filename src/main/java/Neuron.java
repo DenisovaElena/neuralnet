@@ -9,8 +9,8 @@ public class Neuron
     private double out;
     private double sigma;
     public static Random random = new Random();
-    public static final double rangeMin = -0.3;
-    public static final double rangeMax = 0.3;
+    public static final double rangeMin = -0.0003;
+    public static final double rangeMax = 0.0003;
 
     public Neuron(int weightsCount) {
         this.weight = new double[weightsCount];

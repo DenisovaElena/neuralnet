@@ -14,8 +14,8 @@ public class NeuralNet
     private volatile boolean complete;
     private double[] error;
     private double errorCommon;
-    private final double eta = 0.05;
-    private final double epsThreshold = 0.1;
+    private final double eta = 0.00000001;
+    private final double epsThreshold = 0.001;
 
     public NeuralNet(int inputVectorSize, int outputNeuronsCount)
     {
@@ -74,6 +74,7 @@ public class NeuralNet
                 // создаем пустой массив для хранения ошибки каждого j-го нейрона
                 error = new double[layer.length];
                 // вычисляем ошибку каждого j-го нейрона
+
                 for (int j = 0; j < layer.length; j++)
                 {
                     error[j] = (vectorSet[m].getDisireOutputs()[j] - layer[j].getOut()) * (vectorSet[m].getDisireOutputs()[j] - layer[j].getOut());
@@ -89,18 +90,13 @@ public class NeuralNet
                     int n = layer[j].getWeight().length;
                     for (int i = 0; i < n; i++)
                     {
-                        deltaWeight[j][i] += -eta * layer[j].getSigma() * vectorSet[m].getX()[i];
+                        deltaWeight[j][i] = -eta * layer[j].getSigma() * vectorSet[m].getX()[i];
                     }
+                    layer[j].correctWeights(deltaWeight[j]);
                 }
             }
 
-
-
-            // цикл коррекции синаптических весов
-            for (int j = 0; j < layer.length; j++)
-            {
-                layer[j].correctWeights(deltaWeight[j]);
-            }
+            //Thread.sleep(1);
 
             if (errorCommon < epsThreshold)
                 break;
@@ -118,7 +114,7 @@ public class NeuralNet
         for (int j = 0; j < layer.length; j++)
         {
             layer[j].calcOut(vector);
-            outVector[j] = layer[j].getOut();
+            outVector[j] = Math.round(layer[j].getOut() * 100.0) / 100.0;
         }
         return outVector;
     }
