@@ -26,6 +26,7 @@ public class GUI extends JFrame
     private JLabel labelEpoch;
     private JTextArea textAreaAnswer;
     private JButton buttonTest;
+    private JLabel labelCommonError;
     private NeuralNet neuralNet;
 
     public GUI()
@@ -67,6 +68,7 @@ public class GUI extends JFrame
                 {
                     labelEpoch.setText("Номер эпохи: " + neuralNet.getEpochNumber());
                     labelError.setText("Ошибки нейронов: " + Arrays.toString(neuralNet.getError()));
+                    labelCommonError.setText("Общая ошибка: " + neuralNet.getErrorCommon());
                 }
                 textAreaAnswer.append("Обучение завершено\n");
                 buttonTest.setEnabled(true);
