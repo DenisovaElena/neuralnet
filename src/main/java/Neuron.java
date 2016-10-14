@@ -12,7 +12,7 @@ public class Neuron
     public static final double rangeMax = 0.3;
 
     public Neuron(int weightsCount) {
-        this.weight = new double[weightsCount + 1];
+        this.weight = new double[weightsCount];
         this.out = 0.0;
         randomizeWeights();
     }

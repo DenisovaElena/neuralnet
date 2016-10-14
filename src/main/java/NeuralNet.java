@@ -58,17 +58,16 @@ public class NeuralNet
                     sumError += error[j];
                 }
 
-                Thread.sleep(100);
+                Thread.sleep(10);
                 // цикл коррекции синаптических весов
                 for (int j = 0; j < layer.length; j++) {
                     // создаем пустой массив для хранения величины изменения каждого синпатического веса wij
                     double[] deltaWeight = new double[layer[j].getWeight().length];
                     // вычисляем величину изменения синапатических весов wij
                     int n = layer[j].getWeight().length;
-                    for (int i = 0; i < n - 1; i++) {
+                    for (int i = 0; i < n; i++) {
                         deltaWeight[i] += eta * error[j] * vectorSet[m].getX()[i];
                     }
-                    deltaWeight[n - 1] += eta * error[j];
                     // корректируем синпатические веса
                     layer[j].correctWeights(deltaWeight);
                 }
