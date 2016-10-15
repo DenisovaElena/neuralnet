@@ -90,9 +90,8 @@ public class NeuralNet
                     int n = layer[j].getWeight().length;
                     for (int i = 0; i < n; i++)
                     {
-                        deltaWeight[j][i] = -eta * layer[j].getSigma() * vectorSet[m].getX()[i];
+                        deltaWeight[j][i] -= eta * layer[j].getSigma() * vectorSet[m].getX()[i];
                     }
-                    layer[j].correctWeights(deltaWeight[j]);
                 }
             }
 
@@ -100,6 +99,12 @@ public class NeuralNet
 
             if (errorCommon < epsThreshold)
                 break;
+
+            for (int j = 0; j < layer.length; j++)
+            {
+                layer[j].correctWeights(deltaWeight[j]);
+            }
+
 
             epochNumber++;
         } // критерий останова обучения
