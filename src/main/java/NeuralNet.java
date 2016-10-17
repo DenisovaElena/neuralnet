@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by MakhrovSS on 27.09.2016.
@@ -15,7 +12,7 @@ public class NeuralNet
     private double[] error;
     private double errorCommon;
     private final double eta = 0.00000001;
-    private final double epsThreshold = 0.001;
+    private final double epsThreshold = 0.0001;
 
     public NeuralNet(int inputVectorSize, int outputNeuronsCount)
     {
@@ -54,32 +51,38 @@ public class NeuralNet
     {
         epochNumber = 0;
         double[][] deltaWeight = new double[layer.length][];
+        for (int j = 0; j < layer.length; j++)
+        {
+            // создаем пустой массив для каждого синпатического веса wij каждого j-го нейрона в слое
+            deltaWeight[j] = new double[layer[j].getWeight().length];
+        }
+        // создаем пустой массив для хранения ошибки каждого j-го нейрона
+        error = new double[layer.length];
+        Random random = new Random();
 
         while (true)
         {
-            for (int j = 0; j < layer.length; j++)
-            {
-                // создаем пустой массив для накопления каждого синпатического веса wij каждого j-го нейрона в слое
-                deltaWeight[j] = new double[layer[j].getWeight().length];
-                errorCommon = 0.0;
-            }
-            for (int m = 0; m < vectorSet.length; m++)
-            {
+
+                int m = random.nextInt(vectorSet.length);
                 // вычисляем выход каждого j-го нейрона
                 for (int j = 0; j < layer.length; j++)
                 {
                     layer[j].calcOut(vectorSet[m].getX());
                 }
 
-                // создаем пустой массив для хранения ошибки каждого j-го нейрона
-                error = new double[layer.length];
+
                 // вычисляем ошибку каждого j-го нейрона
 
+                errorCommon = 0.0;
                 for (int j = 0; j < layer.length; j++)
                 {
                     error[j] = (vectorSet[m].getDisireOutputs()[j] - layer[j].getOut()) * (vectorSet[m].getDisireOutputs()[j] - layer[j].getOut());
-                    errorCommon += 0.5 * error[j] / vectorSet.length;
+                    errorCommon += 0.5 * error[j];
                 }
+
+
+                if (errorCommon < epsThreshold)
+                    break;
 
                 // цикл вычисления величин коррекции синаптических весов
                 for (int j = 0; j < layer.length; j++)
@@ -90,24 +93,18 @@ public class NeuralNet
                     int n = layer[j].getWeight().length;
                     for (int i = 0; i < n; i++)
                     {
-                        deltaWeight[j][i] -= eta * layer[j].getSigma() * vectorSet[m].getX()[i];
+                        deltaWeight[j][i] = - eta * layer[j].getSigma() * vectorSet[m].getX()[i];
                     }
+                    layer[j].correctWeights(deltaWeight[j]);
                 }
+
+                epochNumber++;
             }
 
             //Thread.sleep(1);
 
-            if (errorCommon < epsThreshold)
-                break;
-
-            for (int j = 0; j < layer.length; j++)
-            {
-                layer[j].correctWeights(deltaWeight[j]);
-            }
 
 
-            epochNumber++;
-        } // критерий останова обучения
 
         complete = true;
     }
