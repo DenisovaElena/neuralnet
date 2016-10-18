@@ -86,15 +86,13 @@ public class GUI extends JFrame
         {
             showMessageDialog(null, e.toString());
         }
-
-        int f = 0;
     }
 
     public void test() {
         try
         {
             String path = "c://Test//";
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 10; i++)
             {
                 File[] files = new File(path + i).listFiles();
                 for (File file : files)
@@ -141,7 +139,7 @@ public class GUI extends JFrame
     {
         List<Vector> trainVectorSet = new ArrayList();
 
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 10; i++)
         {
             File[] files = new File(rootDir + "//" + i).listFiles();
             for (File file : files)
@@ -151,7 +149,7 @@ public class GUI extends JFrame
                 int[][] grayImage = imageToGrayScale(image);
                 double[] imageVector = imageToVector(grayImage);
 
-                double[] desireOutputs = new double[6];
+                double[] desireOutputs = new double[10];
                 for (int k = 0; k < desireOutputs.length; k++)
                 {
                     desireOutputs[k] = i == k ? 1 : 0;
