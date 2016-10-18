@@ -8,7 +8,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.IntStream;
+
 import static javax.swing.JOptionPane.showMessageDialog;
 
 
@@ -67,7 +70,11 @@ public class GUI extends JFrame
                 while (!neuralNet.isComplete())
                 {
                     labelEpoch.setText("Номер эпохи: " + neuralNet.getEpochNumber());
-                    labelError.setText("Ошибки нейронов: " + Arrays.toString(neuralNet.getError()));
+                    double[] err = neuralNet.getError();
+                    StringBuilder s = new StringBuilder();
+                    IntStream.range(0, err.length)
+                            .forEach(i -> s.append(String.format("[%.5f] ", err[i])));
+                    labelError.setText("Ошибки нейронов: " + s);
                     labelCommonError.setText("Общая ошибка: " + neuralNet.getErrorCommon());
                 }
                 textAreaAnswer.append("Обучение завершено\n");
@@ -95,13 +102,21 @@ public class GUI extends JFrame
             for (int i = 0; i < 10; i++)
             {
                 File[] files = new File(path + i).listFiles();
+                int count = 0;
+                int passed = 0;
                 for (File file : files)
                 {
                     double[] testVector = readVector(file.getPath());
                     double[] answer = neuralNet.test(testVector);
-                    textAreaAnswer.append(String.format("Тест-образ №%d = %s; Нейрон №%d.%n", i, Arrays.toString(answer), getMaxNeuronIdx(answer)));
+                    count++;
+                    if (i == getMaxNeuronIdx(answer))
+                        passed++;
+
+                    //textAreaAnswer.append(String.format("Тест-образ №%d = %s; Нейрон №%d.%n", i, Arrays.toString(answer), getMaxNeuronIdx(answer)));
                     //textAreaAnswer.setCaretPosition(textAreaAnswer.getDocument().getLength());
                 }
+                double percent = (double)passed / count * 100.0;
+                textAreaAnswer.append(String.format("Процент распознавания класса образов №%d: %.2f%n", i, percent));
             }
         }
         catch (IOException e)

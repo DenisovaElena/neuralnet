@@ -12,7 +12,7 @@ public class NeuralNet
     private double[] error;
     private double errorCommon;
     private final double eta = 0.00000001;
-    private final double epsThreshold = 0.0001;
+    private final double epsThreshold = 0.000000001;
 
     public NeuralNet(int inputVectorSize, int outputNeuronsCount)
     {
