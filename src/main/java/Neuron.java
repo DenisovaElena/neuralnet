@@ -5,11 +5,11 @@ import java.util.Random;
  */
 public class Neuron
 {
-    private double[] weight;
-    private double out;
-    public static Random random = new Random();
-    public static final double rangeMin = -0.3;
-    public static final double rangeMax = 0.3;
+    private double[] weight; //вектор синаптических весов
+    private double out; //выход нейрона
+    public static Random random = new Random(); // объявляем и создаем экземпляр класса генератора случайных значений
+    public static final double rangeMin = -0.3; //нижняя граница генератора случайных весов
+    public static final double rangeMax = 0.3; //верхняя граница генератора случайных весов
 
     public Neuron(int weightsCount) {
         this.weight = new double[weightsCount];
