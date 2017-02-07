@@ -1,21 +1,16 @@
-import java.util.*;
+import java.util.Random;
 
-/**
- * Created by MakhrovSS on 27.09.2016.
- */
-public class NeuralNet
-{
+public class NeuralNet {
     private int inputVectorSize;
     private Neuron[] layer;
     private int epochNumber;
-    private volatile boolean complete;
+    private boolean complete;
     private double[] error;
-    private double errorCommon;
-    private final double eta = 0.00000001;
-    private final double epsThreshold = 0.000000001;
+    private double errorNet;
+    private double eta = 0.00000001;
+    private double epsThreshold = 0.000000001;
 
-    public NeuralNet(int inputVectorSize, int outputNeuronsCount)
-    {
+    public NeuralNet(int inputVectorSize, int outputNeuronsCount) {
         this.inputVectorSize = inputVectorSize;
         layer = new Neuron[outputNeuronsCount];
         for (int j = 0; j < outputNeuronsCount; j++)
@@ -23,95 +18,95 @@ public class NeuralNet
             layer[j] = new Neuron(inputVectorSize);
         }
         error = new double[layer.length];
-        errorCommon = 0.0;
     }
 
     public double[] getError() {
         return error;
     }
 
-    public double getErrorCommon()
-    {
-        return errorCommon;
-    }
-
     public int getEpochNumber() {
         return epochNumber;
-    }
-
-    public void setComplete(boolean complete) {
-        this.complete = complete;
     }
 
     public boolean isComplete() {
         return complete;
     }
 
+    public void setComplete(boolean complete) {
+        this.complete = complete;
+    }
+
     public void train(Vector[] vectorSet) throws InterruptedException
+
     {
+        // эпоха обучения равна нулю
         epochNumber = 0;
-        double[][] deltaWeight = new double[layer.length][];
+        double[][] deltaWeight = new double[layer.length][]; // количество векторов равно количеству нейронов
+
         for (int j = 0; j < layer.length; j++)
         {
-            // создаем пустой массив для каждого синпатического веса wij каждого j-го нейрона в слое
+            // создаем пустой массив для каждого синаптического веса wij каждого j-го нейрона в слое
             deltaWeight[j] = new double[layer[j].getWeight().length];
         }
-        // создаем пустой массив для хранения ошибки каждого j-го нейрона
+
+        // массив для хранения ошибки каждого нейрона
         error = new double[layer.length];
-        Random random = new Random();
+
+        Random random = new Random(); // случайным образом берем обучающие векторы - цель
 
         while (true)
         {
+            // шаг 3 и 4 берем случайным образом обучающий вектор
+            int m = random.nextInt(vectorSet.length);
 
-                int m = random.nextInt(vectorSet.length);
-                // вычисляем выход каждого j-го нейрона
-                for (int j = 0; j < layer.length; j++)
-                {
-                    layer[j].calcOut(vectorSet[m].getX());
-                }
-
-
-                // вычисляем ошибку каждого j-го нейрона
-
-                errorCommon = 0.0;
-                for (int j = 0; j < layer.length; j++)
-                {
-                    error[j] = (vectorSet[m].getDisireOutputs()[j] - layer[j].getOut()) * (vectorSet[m].getDisireOutputs()[j] - layer[j].getOut());
-                    errorCommon += 0.5 * error[j];
-                }
-
-
-                if (errorCommon < epsThreshold)
-                    break;
-
-                // цикл вычисления величин коррекции синаптических весов
-                for (int j = 0; j < layer.length; j++)
-                {
-                    // вычисляем sigma
-                    layer[j].calcSigma(vectorSet[m].getDisireOutputs()[j], vectorSet[m].getX());
-                    // вычисляем величину изменения синапатических весов wij
-                    int n = layer[j].getWeight().length;
-                    for (int i = 0; i < n; i++)
-                    {
-                        deltaWeight[j][i] = - eta * layer[j].getSigma() * vectorSet[m].getX()[i];
-                    }
-                    layer[j].correctWeights(deltaWeight[j]);
-                }
-
-                epochNumber++;
+            // шаг 5
+            for (int j = 0; j < layer.length; j++) //перебор нейронов
+            {
+                layer[j].calcOut(vectorSet[m].getX());
             }
 
-            //Thread.sleep(1);
+            errorNet = 0; // ошибка не накапливается - сбрасываем при каждой итерации
 
+            // шаг 6
+            for (int j = 0; j < layer.length; j++)
+            { // считаем среднеквадратичную ошибку каждого j-го нейрона
+                error[j] =
+                        (vectorSet[m].getDesireOutputs()[j] -
+                                layer[j].getOut()) *
+                                (vectorSet[m].getDesireOutputs()[j] -
+                                        layer[j].getOut());
+                errorNet += 0.5 * error[j]; // сумматор
+            }
 
+            // шаг 7
+            if (errorNet < epsThreshold) // ошибка < ошибки порога
+                break; // прерываем внешний цикл
+            // критерий останова обучения
 
+            // Шаг 8 цикл коррекции синаптических весов
+            for (int j = 0; j < layer.length; j++)
+            {
+                layer[j].calcSigma(vectorSet[m].getDesireOutputs()[j]);
 
+                int n = layer[j].getWeight().length; // кол-во синаптических весов j-го нейрона
+
+                for (int i = 0; i < n; i++)
+                {
+                    deltaWeight[j][i] = - eta * layer[j].getSigma() * vectorSet[m].getX()[i];
+                }
+                layer[j].correctWeights(deltaWeight[j]);
+            }
+            epochNumber++;
+        }
         complete = true;
+    }
+
+    public double getErrorNet() {
+        return errorNet;
     }
 
     public double[] test(double[] vector)
     {
-        // вычисляем выход каждого j-го нейрона
         double[] outVector = new double[layer.length];
         for (int j = 0; j < layer.length; j++)
         {

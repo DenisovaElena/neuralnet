@@ -1,16 +1,13 @@
 import java.util.Random;
 
-/**
- * Created by MakhrovSS on 27.09.2016.
- */
-public class Neuron
-{
+public class Neuron {
     private double[] weight;
-    private double out;
+    private double out; // y
+    private double sum; // net
     private double sigma;
     public static Random random = new Random();
-    public static final double rangeMin = -0.0003;
-    public static final double rangeMax = 0.0003;
+    public double rangeMin = -0.0003;
+    public double rangeMax = 0.0003;
 
     public Neuron(int weightsCount) {
         this.weight = new double[weightsCount];
@@ -29,26 +26,26 @@ public class Neuron
     private double activationFunc(double val)
     {
         return 1.0 / (1.0 + Math.exp(-val));
+
     }
 
     private double derivativeActivationFunc(double val)
     {
-        return activationFunc(val)*(1 - activationFunc(val));
+        return  activationFunc(val) * (1.0 - activationFunc(val));
     }
 
-    public void calcSigma(double desireResponse, double[] x)
+    public void calcSigma (double desireResponse)
     {
-        double sum = 0;
-        for (int i = 0; i < x.length; i++)
-        {
-            sum += x[i]*weight[i];
-        }
-        this.sigma = -(desireResponse - this.out) * derivativeActivationFunc(sum);
+        this.sigma = - (desireResponse - this.out) * derivativeActivationFunc(sum);
+    }
+
+    public double getSigma() {
+        return sigma;
     }
 
     public void calcOut(double[] x)
     {
-        double sum = 0;
+        this.sum = 0;
         for (int i = 0; i < x.length; i++)
         {
             sum += x[i]*weight[i];
@@ -59,11 +56,6 @@ public class Neuron
     public double getOut()
     {
         return out;
-    }
-
-    public double getSigma()
-    {
-        return sigma;
     }
 
     public void correctWeights(double[] deltaWeight)

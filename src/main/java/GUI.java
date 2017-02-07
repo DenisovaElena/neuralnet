@@ -8,16 +8,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
 import static javax.swing.JOptionPane.showMessageDialog;
 
-
-/**
- * Created by MakhrovSS on 27.09.2016.
- */
 public class GUI extends JFrame
 {
     private JPanel rootPanel;
@@ -29,14 +24,14 @@ public class GUI extends JFrame
     private JLabel labelEpoch;
     private JTextArea textAreaAnswer;
     private JButton buttonTest;
-    private JLabel labelCommonError;
+    private JLabel labelNetError;
     private NeuralNet neuralNet;
 
     public GUI()
     {
         setContentPane(rootPanel);
         pack();
-        setTitle("Обучение через дельта-правило");
+        setTitle("Обучение методом SGD");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setVisible(true);
@@ -61,7 +56,7 @@ public class GUI extends JFrame
         {
             buttonTest.setEnabled(false);
             Vector[] trainVectorSet = readTrainVectors("C://Train");
-            neuralNet = new NeuralNet(trainVectorSet[0].getX().length, trainVectorSet[0].getDisireOutputs().length);
+            neuralNet = new NeuralNet(trainVectorSet[0].getX().length, trainVectorSet[0].getDesireOutputs().length);
             neuralNet.setComplete(false);
 
             Runnable task1 = () -> { try { neuralNet.train(trainVectorSet); } catch (InterruptedException e) {} };
@@ -72,10 +67,11 @@ public class GUI extends JFrame
                     labelEpoch.setText("Номер эпохи: " + neuralNet.getEpochNumber());
                     double[] err = neuralNet.getError();
                     StringBuilder s = new StringBuilder();
-                    IntStream.range(0, err.length)
-                            .forEach(i -> s.append(String.format("[%.5f] ", err[i])));
+                    IntStream.range(0,err.length)
+                            .forEach(i -> s.append(String.format("[%.5f]", err[i])));
+
                     labelError.setText("Ошибки нейронов: " + s);
-                    labelCommonError.setText("Общая ошибка: " + neuralNet.getErrorCommon());
+                    labelNetError.setText("Ошибка вектора: " + neuralNet.getErrorNet());
                 }
                 textAreaAnswer.append("Обучение завершено\n");
                 buttonTest.setEnabled(true);
@@ -93,30 +89,36 @@ public class GUI extends JFrame
         {
             showMessageDialog(null, e.toString());
         }
+
+        int f = 0;
     }
 
     public void test() {
         try
         {
             String path = "c://Test//";
+            int totalCount = 0;
+            int totalPassed = 0;
             for (int i = 0; i < 10; i++)
             {
                 File[] files = new File(path + i).listFiles();
                 int count = 0;
                 int passed = 0;
-                for (File file : files)
-                {
+                for (File file : files) {
                     double[] testVector = readVector(file.getPath());
                     double[] answer = neuralNet.test(testVector);
                     count++;
-                    if (i == getMaxNeuronIdx(answer))
+                    if (i == getMaxNeuronIdx(answer)) {
                         passed++;
-
-                    //textAreaAnswer.append(String.format("Тест-образ №%d = %s; Нейрон №%d.%n", i, Arrays.toString(answer), getMaxNeuronIdx(answer)));
-                    //textAreaAnswer.setCaretPosition(textAreaAnswer.getDocument().getLength());
+                    }
                 }
                 double percent = (double)passed / count * 100.0;
                 textAreaAnswer.append(String.format("Процент распознавания класса образов №%d: %.2f%n", i, percent));
+                totalCount += count;
+                totalPassed += passed;
+
+                double totalPercent = 100.0 - (double)totalPassed / totalCount * 100.0;
+                textAreaAnswer.append(String.format("Процент ошибки распознавания: %.2f%n", totalPercent));
             }
         }
         catch (IOException e)
@@ -128,7 +130,6 @@ public class GUI extends JFrame
             showMessageDialog(null, e.toString());
         }
     }
-
     public int getMaxNeuronIdx(double[] answer)
     {
         int maxIdx = 0;
@@ -140,7 +141,6 @@ public class GUI extends JFrame
         return maxIdx;
     }
 
-
     public double[] readVector(String path) throws IOException
     {
         BufferedImage image = ImageIO.read(new File(path));
@@ -149,8 +149,7 @@ public class GUI extends JFrame
         return imageVector;
     }
 
-
-    public Vector[] readTrainVectors(String rootDir) throws IOException
+    public Vector[] readTrainVectors(String rootDir) throws IOException // считать входные образы
     {
         List<Vector> trainVectorSet = new ArrayList();
 
@@ -207,7 +206,6 @@ public class GUI extends JFrame
         return image;
     }
 
-
     public double[] imageToVector(int[][] image)
     {
         double[] resultVector = new double[image[0].length * image[1].length];
@@ -221,5 +219,4 @@ public class GUI extends JFrame
         }
         return resultVector;
     }
-
 }
